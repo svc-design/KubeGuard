@@ -1,13 +1,9 @@
-# Makefile for KubeGuard
+APP_NAME := KubeGuard
+MAIN_FILE := main.go
+TAG ?= latest
+CONFIG ?= k8s_backup_config.yaml
 
-BINARY_NAME=k8s_backup_tool
-BUILD_DIR=bin
-CONFIG_FILE=k8s_backup_config.yaml
-
-VERSION=$(shell git describe --tags --always --dirty)
-LDFLAGS=-ldflags "-X main.version=$(VERSION) -s -w"
-
-.PHONY: all build run clean test fmt vet release linux-amd64 linux-arm64
+.PHONY: all build run clean init backup restore delete list help
 
 all: build
 
@@ -15,40 +11,35 @@ init:
 	GOPROXY=https://goproxy.cn,direct go get github.com/spf13/cobra@latest
 	go mod tidy
 
-# 构建本地二进制
 build:
-	go build $(LDFLAGS) -o $(BUILD_DIR)/$(BINARY_NAME) cmd/main.go
+	go build -o $(APP_NAME) $(MAIN_FILE)
 
-# 运行工具 (默认展示帮助信息)
-run: build
-	./$(BUILD_DIR)/$(BINARY_NAME) --help
+run:
+	go run $(MAIN_FILE) list
 
-# 格式化代码
-fmt:
-	go fmt ./...
+backup:
+	go run $(MAIN_FILE) backup
 
-# 检测代码潜在错误
-vet:
-	go vet ./...
+restore:
+	go run $(MAIN_FILE) restore $(TAG)
 
-# 执行单元测试
-test:
-	go test ./... -cover
+delete:
+	go run $(MAIN_FILE) delete $(TAG)
 
-# 清理构建产物
+list:
+	go run $(MAIN_FILE) list
+
 clean:
-	rm -rf $(BUILD_DIR)/*
+	rm -f $(APP_NAME)
 
-# 交叉编译 Linux amd64
-linux-amd64:
-	GOOS=linux GOARCH=amd64 go build $(LDFLAGS) -o $(BUILD_DIR)/$(BINARY_NAME)-linux-amd64 cmd/main.go
-
-# 交叉编译 Linux arm64
-linux-arm64:
-	GOOS=linux GOARCH=arm64 go build $(LDFLAGS) -o $(BUILD_DIR)/$(BINARY_NAME)-linux-arm64 cmd/main.go
-
-# 同时构建 amd64 和 arm64 二进制包
-release: clean linux-amd64 linux-arm64
-	tar -czvf $(BUILD_DIR)/$(BINARY_NAME)-linux-amd64.tar.gz -C $(BUILD_DIR) $(BINARY_NAME)-linux-amd64
-	tar -czvf $(BUILD_DIR)/$(BINARY_NAME)-linux-arm64.tar.gz -C $(BUILD_DIR) $(BINARY_NAME)-linux-arm64
-
+help:
+	@echo "🔧 KubeGuard CLI Usage"
+	@echo ""
+	@echo "make build           编译可执行文件"
+	@echo "make run             默认执行 list"
+	@echo "make list            列出所有备份"
+	@echo "make backup          创建备份"
+	@echo "make restore TAG=xxx 恢复指定备份"
+	@echo "make delete TAG=xxx  删除指定备份"
+	@echo "make init            初始化依赖 (go mod tidy)"
+	@echo "make clean           清理构建产物"
