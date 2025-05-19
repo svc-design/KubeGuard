@@ -26,6 +26,7 @@ KubeGuard: 🚀 Easy Kubernetes cluster backup and restore tool, built with Vele
 
 # TLDR
 
+```
 Usage:
   KubeGuard [command] -c <ConfigPath>
 
@@ -39,3 +40,4 @@ Available Commands:
 
 Flags:
   -h, --help   help for k8s_backup_tool
+```
