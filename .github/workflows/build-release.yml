@@ -39,23 +39,23 @@ jobs:
         with:
           go-version: '1.21'
 
-      - name: Build PulumiGo binary
-        working-directory: KubeGuard
+      - name: Build KubeGuard binary
+        working-directory: ./
         run: |
           mkdir -p dist
           GOOS=linux GOARCH=${{ matrix.arch }} go build -o dist/KubeGuard-${{ matrix.os }}-${{ matrix.arch }} main.go
 
       - name: Compress binary
-        working-directory: KubeGuard
+        working-directory: ./
         run: |
           cd dist
-          tar -czvf KubeGuard-${{ matrix.os }}-${{ matrix.arch }}.tar.gz PulumiGo-${{ matrix.os }}-${{ matrix.arch }}
+          tar -czvf KubeGuard-${{ matrix.os }}-${{ matrix.arch }}.tar.gz KubeGuard-${{ matrix.os }}-${{ matrix.arch }}
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: KubeGuard-${{ matrix.os }}-${{ matrix.arch }}
-          path: KubeGuard/dist/PulumiGo-${{ matrix.os }}-${{ matrix.arch }}.tar.gz
+          path: KubeGuard/dist/KubeGuard-${{ matrix.os }}-${{ matrix.arch }}.tar.gz
 
   test:
     name: Test CLI execution
