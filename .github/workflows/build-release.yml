@@ -27,8 +27,8 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        os: [ubuntu-20.04, ubuntu-22.04, ubuntu-24.04]
-        arch: [amd64, arm64]
+        goos: [linux, darwin]
+        goarch: [amd64, arm64]
 
     steps:
       - name: Checkout Repo
@@ -40,45 +40,43 @@ jobs:
           go-version: '1.21'
 
       - name: Build KubeGuard binary
-        working-directory: ./
         run: |
           mkdir -p dist
-          GOOS=linux GOARCH=${{ matrix.arch }} go build -o dist/KubeGuard-${{ matrix.os }}-${{ matrix.arch }} main.go
+          go build -o dist/KubeGuard-${{ matrix.goos }}-${{ matrix.goarch }} main.go
 
       - name: Compress binary
-        working-directory: ./
         run: |
           cd dist
-          tar -czvf KubeGuard-${{ matrix.os }}-${{ matrix.arch }}.tar.gz KubeGuard-${{ matrix.os }}-${{ matrix.arch }}
+          tar -czvf KubeGuard-${{ matrix.goos }}-${{ matrix.goarch }}.tar.gz KubeGuard-${{ matrix.goos }}-${{ matrix.goarch }}
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: KubeGuard-${{ matrix.os }}-${{ matrix.arch }}
-          path: KubeGuard/dist/KubeGuard-${{ matrix.os }}-${{ matrix.arch }}.tar.gz
+          name: KubeGuard-${{ matrix.goos }}-${{ matrix.goarch }}
+          path: dist/KubeGuard-${{ matrix.goos }}-${{ matrix.goarch }}.tar.gz
 
   test:
-    name: Test CLI execution
+    name: Test Linux CLI binaries by arch
     needs: build
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        os: [ubuntu-20.04]
-        arch: [amd64]
+        os: [ubuntu-20.04, ubuntu-22.04, ubuntu-24.04]
+        arch: [amd64, arm64]
 
     steps:
       - name: Download binary
         uses: actions/download-artifact@v4
         with:
-          name: KubeGuard-${{ matrix.os }}-${{ matrix.arch }}
+          name: KubeGuard-linux-${{ matrix.arch }}
           path: test-dir
 
       - name: Extract and test CLI
         run: |
           cd test-dir
-          tar -xzf KubeGuard-${{ matrix.os }}-${{ matrix.arch }}.tar.gz
-          chmod +x KubeGuard-${{ matrix.os }}-${{ matrix.arch }}
-          ./KubeGuard-${{ matrix.os }}-${{ matrix.arch }} --help
+          tar -xzf KubeGuard-linux-${{ matrix.arch }}.tar.gz
+          chmod +x KubeGuard-linux-${{ matrix.arch }}
+          ./KubeGuard-linux-${{ matrix.arch }} --help
 
   publish-release:
     name: Publish Daily Release
