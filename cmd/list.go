@@ -9,6 +9,6 @@ var listCmd = &cobra.Command{
 	Use:   "list",
 	Short: "列出所有备份（Velero + S3）",
 	Run: func(cmd *cobra.Command, args []string) {
-		shell.RunScript("list")
+		shell.RunCmd("list")
 	},
 }

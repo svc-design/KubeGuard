@@ -10,7 +10,7 @@ var deleteCmd = &cobra.Command{
 	Short: "删除指定备份",
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		shell.RunScript("delete", args[0])
+		shell.RunCmd("delete", args[0])
 	},
 }
 
