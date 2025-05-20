@@ -11,6 +11,7 @@ var rootCmd = &cobra.Command{
 }
 
 func Execute() error {
+	rootCmd.CompletionOptions.DisableDefaultCmd = true
 	rootCmd.AddCommand(backupCmd, restoreCmd, listCmd, deleteCmd)
 	return rootCmd.Execute()
 }
