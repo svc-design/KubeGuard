@@ -10,7 +10,7 @@ var restoreCmd = &cobra.Command{
 	Short: "恢复节点数据 ➕ 应用资源",
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		shell.RunScript("restore", args[0])
+		shell.RunCmd("restore", args[0])
 	},
 }
 
